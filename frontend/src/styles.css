@@ -1,0 +1,94 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1115;
+  --panel: #161a22;
+  --panel-2: #1d222d;
+  --border: #262c39;
+  --text: #e7eaf2;
+  --muted: #8b94a8;
+  --accent: #7aa2ff;
+  --ok: #5cd29a;
+  --warn: #ffcc66;
+  --err: #ff7b7b;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+
+button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+button:hover { background: #232a39; }
+
+input, select {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  grid-template-rows: 48px 1fr;
+  height: 100vh;
+  gap: 0;
+}
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+.topbar h1 { font-size: 14px; font-weight: 600; margin: 0; letter-spacing: 0.05em; }
+
+.sidebar { background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto; }
+.detail { background: var(--panel); border-left: 1px solid var(--border); overflow-y: auto; padding: 12px; }
+
+.conn-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.conn-item.selected { background: var(--panel-2); }
+.conn-item .name { font-weight: 500; }
+.conn-item .meta { font-size: 11px; color: var(--muted); }
+
+.section-title {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lag-ok { color: var(--ok); }
+.lag-warn { color: var(--warn); }
+.lag-err { color: var(--err); }
+
+.kv { display: grid; grid-template-columns: 130px 1fr; gap: 4px 8px; font-size: 12px; }
+.kv .k { color: var(--muted); }
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted);
+}
+
+.btn-row { display: flex; gap: 8px; padding: 10px; border-bottom: 1px solid var(--border); }

@@ -1,0 +1,71 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      PGP_HOST: 0.0.0.0
+    # Connection secrets are resolved by env-var name (password_env/dsn_env),
+    # so put them in .env and they become visible to the app here.
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - pgp-data:/app/.pg_publisher
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/healthz')"
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  # ---- optional demo pair (make demo-up) -----------------------------------
+  # Two throwaway Postgres 17 instances configured for logical replication.
+  # From the app container, reach them as pub-db:5432 / sub-db:5432; from the
+  # host, localhost:5433 / localhost:5434. Passwords below are demo-only.
+  pub-db:
+    profiles: [demo]
+    image: postgres:17
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_replication_slots=10
+      - -c
+      - max_wal_senders=10
+    environment:
+      POSTGRES_PASSWORD: pub_demo_pw
+      POSTGRES_DB: demo
+    ports:
+      - "5433:5432"
+    volumes:
+      - pub-data:/var/lib/postgresql/data
+
+  sub-db:
+    profiles: [demo]
+    image: postgres:17
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_replication_slots=10
+      - -c
+      - max_wal_senders=10
+    environment:
+      POSTGRES_PASSWORD: sub_demo_pw
+      POSTGRES_DB: demo
+    ports:
+      - "5434:5432"
+    volumes:
+      - sub-data:/var/lib/postgresql/data
+
+volumes:
+  pgp-data:
+  pub-data:
+  sub-data:

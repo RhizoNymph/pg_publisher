@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Env / secrets
+.env
+.env.local
+
+# App data
+.pg_publisher/
+
+# Node
+node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
