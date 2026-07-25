@@ -20,6 +20,12 @@
 3. SQL is built with `asyncpg.utils._quote_ident` / explicit identifier quoting; literals via bind params where allowed (DDL forbids most params, so identifiers are validated against a strict regex).
 4. Audit log row written to SQLite with timestamp, user-agent (best-effort), action, SQL, outcome.
 
+## UI entry points
+- Creates: topbar modals (`NewPublicationModal`, `NewSubscriptionModal`).
+- `DropPublication` / `DropSubscription`: the detail panel's `Drop` button →
+  `frontend/src/views/actions/DropStreamModal.tsx` (confirmation required;
+  `DropSubscription.disable_first` is exposed as a checkbox there).
+
 ## Files
 - `backend/pg_publisher/actions/models.py` — discriminated union of action types.
 - `backend/pg_publisher/actions/executor.py` — `execute()` dispatcher.

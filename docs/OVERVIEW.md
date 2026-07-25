@@ -74,8 +74,13 @@ Features Index:
     depends_on: [api]
     doc: docs/features/ui_topology.md
   ui_metrics:
-    description: Sparklines and detail panels for replication lag / throughput, plus per-table copy state for subscriptions.
-    entry_points: [frontend/src/views/MetricsPanel.tsx]
+    description: |
+      Sparklines (numbered axes) and detail panels for replication lag /
+      throughput, per-table copy state for subscriptions, and confirmed
+      dropping of the selected publication/subscription.
+    entry_points:
+      - frontend/src/views/MetricsPanel.tsx
+      - frontend/src/views/actions/DropStreamModal.tsx
     depends_on: [api]
     doc: docs/features/ui_metrics.md
 ```

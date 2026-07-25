@@ -36,7 +36,10 @@ export function App() {
       <div style={{ position: "relative", width: "100%", height: "100%", minHeight: 0 }}>
         <Topology onSelectStream={setSelectedStream} />
       </div>
-      <MetricsPanel selected={selectedStream} />
+      <MetricsPanel
+        selected={selectedStream}
+        onDropped={() => setSelectedStream(null)}
+      />
 
       {openModal === "pub" ? (
         <NewPublicationModal onClose={() => setOpenModal(null)} />

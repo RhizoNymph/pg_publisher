@@ -5,9 +5,16 @@ import { MetricSample, SubscriptionRel, WSSamplePayload } from "../lib/types";
 import { liveSocket } from "../lib/ws";
 import { Sparkline } from "../components/Sparkline";
 import { formatBytes } from "../lib/topology";
+import { DropStreamModal } from "./actions/DropStreamModal";
 
 interface Props {
   selected: { connectionId: string; kind: string; name: string } | null;
+  /** Called after the selected stream is dropped, so the caller can deselect. */
+  onDropped: () => void;
+}
+
+function formatSeconds(v: number): string {
+  return Math.abs(v) < 1 ? `${v.toFixed(3)}s` : `${v.toFixed(2)}s`;
 }
 
 // srsubstate codes from pg_subscription_rel.
@@ -49,8 +56,9 @@ function SubscriptionTables({ rels }: { rels: SubscriptionRel[] }) {
   );
 }
 
-export function MetricsPanel({ selected }: Props) {
+export function MetricsPanel({ selected, onDropped }: Props) {
   const [live, setLive] = useState<MetricSample[]>([]);
+  const [confirmDrop, setConfirmDrop] = useState(false);
 
   const history = useQuery({
     queryKey: ["history", selected?.connectionId, selected?.kind, selected?.name],
@@ -70,8 +78,14 @@ export function MetricsPanel({ selected }: Props) {
     retry: false,
   });
 
+  // True once the DROP succeeded; the selection is cleared when the modal is
+  // closed rather than on success, so the result SQL stays readable.
+  const [dropped, setDropped] = useState(false);
+
   useEffect(() => {
     setLive([]);
+    setConfirmDrop(false);
+    setDropped(false);
     if (!selected) return;
     const off = liveSocket.onSample((p: WSSamplePayload) => {
       if (p.connection_id !== selected.connectionId) return;
@@ -113,7 +127,26 @@ export function MetricsPanel({ selected }: Props) {
 
   return (
     <div className="detail">
-      <div className="section-title">{selected.kind} · {selected.name}</div>
+      <div
+        className="section-title"
+        style={{ display: "flex", alignItems: "center", gap: 8 }}
+      >
+        <span style={{ overflowWrap: "anywhere" }}>
+          {selected.kind} · {selected.name}
+        </span>
+        <button
+          onClick={() => setConfirmDrop(true)}
+          style={{
+            marginLeft: "auto",
+            padding: "2px 8px",
+            fontSize: 11,
+            borderColor: "var(--err)",
+            color: "var(--err)",
+          }}
+        >
+          Drop
+        </button>
+      </div>
       <div className="kv" style={{ padding: 8 }}>
         <span className="k">Lag (bytes)</span>
         <span>{last?.lag_bytes != null ? formatBytes(last.lag_bytes) : "—"}</span>
@@ -125,18 +158,39 @@ export function MetricsPanel({ selected }: Props) {
         <span>{series.length}</span>
       </div>
 
-      {rels !== null ? <SubscriptionTables rels={rels} /> : null}
-
       <div style={{ padding: 8 }}>
         <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 4 }}>
           Lag bytes
         </div>
-        <Sparkline points={bytesPoints} yLabel="bytes" color="#7aa2ff" />
+        <Sparkline
+          points={bytesPoints}
+          yLabel="bytes"
+          color="#7aa2ff"
+          formatValue={formatBytes}
+        />
         <div style={{ fontSize: 11, color: "var(--muted)", margin: "12px 0 4px" }}>
           Lag seconds
         </div>
-        <Sparkline points={secondsPoints} yLabel="seconds" color="#ffcc66" />
+        <Sparkline
+          points={secondsPoints}
+          yLabel="seconds"
+          color="#ffcc66"
+          formatValue={formatSeconds}
+        />
       </div>
+
+      {rels !== null ? <SubscriptionTables rels={rels} /> : null}
+
+      {confirmDrop ? (
+        <DropStreamModal
+          target={selected}
+          onDropped={() => setDropped(true)}
+          onClose={() => {
+            setConfirmDrop(false);
+            if (dropped) onDropped();
+          }}
+        />
+      ) : null}
     </div>
   );
 }
